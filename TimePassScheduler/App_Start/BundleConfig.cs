@@ -26,6 +26,7 @@ namespace TimePassScheduler
                       "~/Content/bootstrap.css",
                       "~/Content/site.css",
                       //"~/Content/slick-theme.css",
+                      "~/Content/select2.css",
                       "~/Content/slick.css"));
         }
     }

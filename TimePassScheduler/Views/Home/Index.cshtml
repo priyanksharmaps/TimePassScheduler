@@ -4,13 +4,21 @@
 
 <style>
     .modal {
-        min-height:500px;
-        min-width:1000px;
+        min-height: 500px;
+        min-width: 1000px;
     }
 
     .county {
         border: 1px solid #0073e6;
-        margin:2px;
+        margin: 2px;
+    }
+
+    .countySelected {
+        background-color: #979899;
+    }
+
+    .notSelected {
+        background-color: transparent;
     }
 </style>
 <button id="btnOpenScheduler">Open Scheduler</button>
@@ -19,34 +27,104 @@
     <!-- Modal content-->
     <div id="counties" class="row">
     </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <select id="selectedStaff1" class="multiple-select" name="states[]" multiple="multiple"></select>
+        </div>
+
+        <div class="col-sm-2">
+            <select id="selectedStaff2" class="multiple-select" name="states[]" multiple="multiple"></select>
+        </div>
+
+        <div class="col-sm-2">
+            <select id="selectedStaff3" class="multiple-select" name="states[]" multiple="multiple"></select>
+        </div>
+    </div>
+    <div class="row">
+        <button id="submit">Submit Data</button>
+    </div>
 </div>
 
 
 <script>
-    var counties = undefined;
+    var masterData = undefined;
     $('#btnOpenScheduler').click(function () {
         $("#schModal").modal();
         loadCounties();
     });
 
+    $("#submit").click(submitForm);
+
     function loadCounties() {
         $.ajax({
             url: "http://localhost:51247/api/GetCounties",
             success: function (result) {
-                if (result.counties) {
-                    counties = result.counties
+                if (result.result) {
+                    masterData = result.result;
                 }
                 addCounties();
+                addStaff();
             }
         });
     }
 
     function addCounties() {
-        if (counties !== undefined) {
-            for (var i = 0; i < counties.Counties.length; i++) {
-                $('#counties').append('<div class="col-md-2 county" county-id="' + counties.Counties[i].ID + '">' + counties.Counties[i].Name + '</div>');
+        if (masterData !== undefined) {
+            $('#counties').empty();
+            for (var i = 0; i < masterData.Counties.length; i++) {
+                $('#counties').append('<div class="col-md-2 county" county-id="' + masterData.Counties[i].ID + '" onClick="CountySelection(this)">' + masterData.Counties[i].Name + '</div>');
             }
         }
+    }
+
+    function CountySelection(elem) {
+        var currentValue = $(elem).prop("selected");
+        if (currentValue === 'true') {
+            $(elem).prop("selected", 'false');
+            $(elem).removeClass("countySelected").addClass("notSelected");
+        } else {
+            $(elem).prop("selected", 'true');
+            $(elem).removeClass("notSelected").addClass("countySelected");
+        }
+    }
+
+    function addStaff() {
+        if (masterData !== undefined) {
+            var Data = [];
+            for (var i = 0; i < masterData.StaffMembers.length; i++) {
+                Data.push({ id: masterData.StaffMembers[i].ID, text: masterData.StaffMembers[i].Name });
+            }
+            $(".multiple-select").select2({
+                data: Data
+            });
+        }
+    }
+
+    function submitForm() {
+        var county = [];
+        $(".countySelected").each(function () {
+            county.push($(this).attr("county-id"));
+        });
+        var selectedStaff1 = $("#selectedStaff1").val();
+        var selectedStaff2 = $("#selectedStaff2").val();
+        var selectedStaff3 = $("#selectedStaff3").val();
+
+        var response = { Counties: county, SelectedFirst: selectedStaff1, SelectedSecond: selectedStaff2, SelectedThird: selectedStaff3 };
+        $.ajax({
+            type:"POST",
+            url: "http://localhost:51247/api/SubmitSchedule",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(response),
+            success: function (result) {
+                if (result) {
+                    alert('data saved');
+                }
+            },
+            error: function () {
+                alert("error");
+            }
+        });
     }
 
 </script>

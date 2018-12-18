@@ -11,44 +11,52 @@ namespace TimePassScheduler.Controllers
 
     public class ApiController : Controller
     {
-        private List<County> MockData()
+        private List<Staff> MockDataStaffMembers()
+        {
+
+            var StaffMembers = new List<Staff>();
+            StaffMembers.Add(new Staff { ID = 1, Name = "James Smith" });
+            StaffMembers.Add(new Staff { ID = 2, Name = "Michael Smith" });
+            StaffMembers.Add(new Staff { ID = 3, Name = "Robert Smith" });
+            StaffMembers.Add(new Staff { ID = 4, Name = "David Smith" });
+            StaffMembers.Add(new Staff { ID = 5, Name = "Maria Garcia" });
+            StaffMembers.Add(new Staff { ID = 6, Name = "Maria Hernandez" });
+            StaffMembers.Add(new Staff { ID = 7, Name = "Chistopher Smith" });
+            StaffMembers.Add(new Staff { ID = 8, Name = "Daniel Smith" });
+            StaffMembers.Add(new Staff { ID = 9, Name = "Thomas Garcia" });
+            StaffMembers.Add(new Staff { ID = 10, Name = "Paul Hernandez" });
+            StaffMembers.Add(new Staff { ID = 11, Name = "Steven Smith" });
+            StaffMembers.Add(new Staff { ID = 12, Name = "Ronald Smith" });
+            
+            return StaffMembers;
+        }
+        private List<County> MockDataCounty()
         {
             var counties = new List<County>();
+
             //county 1
-            var county1 = new County { ID = 1, Name = "Atlantic" };
-            county1.StaffMembers = new List<Staff>();
-            county1.StaffMembers.Add(new Staff { ID = 1, Name = "James Smith" });
-            county1.StaffMembers.Add(new Staff { ID = 2, Name = "Michael Smith" });
-            county1.StaffMembers.Add(new Staff { ID = 3, Name = "Robert Smith" });
-            county1.StaffMembers.Add(new Staff { ID = 4, Name = "David Smith" });
-            counties.Add(county1);
+            counties.Add(new County { ID = 1, Name = "Atlantic" });
 
             //county 2
-            var county2 = new County { ID = 1, Name = "Bergen" };
-            county2.StaffMembers = new List<Staff>();
-            county2.StaffMembers.Add(new Staff { ID = 5, Name = "Maria Garcia" });
-            county2.StaffMembers.Add(new Staff { ID = 6, Name = "Maria Hernandez" });
-            county2.StaffMembers.Add(new Staff { ID = 7, Name = "Chistopher Smith" });
-            county2.StaffMembers.Add(new Staff { ID = 8, Name = "Daniel Smith" });
-            counties.Add(county2);
+            counties.Add(new County { ID = 2, Name = "Bergen" });
 
-            //county 2
-            var county3 = new County { ID = 1, Name = "Burlington" };
-            county3.StaffMembers = new List<Staff>();
-            county3.StaffMembers.Add(new Staff { ID = 9, Name = "Thomas Garcia" });
-            county3.StaffMembers.Add(new Staff { ID = 10, Name = "Paul Hernandez" });
-            county3.StaffMembers.Add(new Staff { ID = 11, Name = "Steven Smith" });
-            county3.StaffMembers.Add(new Staff { ID = 12, Name = "Ronald Smith" });
-            counties.Add(county3);
+            //county 3
+            counties.Add(new County { ID = 3, Name = "Burlington" });
 
             return counties;
         }
         // GET: Api
         public JsonResult GetCounties()
         {
-            var counties = new SchedulerViewModal();
-            counties.Counties = MockData();
-            return Json(new { counties }, JsonRequestBehavior.AllowGet);
+            var result = new SchedulerViewModal();
+            result.Counties = MockDataCounty();
+            result.StaffMembers = MockDataStaffMembers();
+            return Json(new { result }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SubmitSchedule(ScheduleResponseViewModel response)
+        {
+            return Json(new {  }, JsonRequestBehavior.AllowGet);
         }
     }
 }

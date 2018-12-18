@@ -8,5 +8,6 @@ namespace TimePassScheduler.Models
     public class SchedulerViewModal
     {
         public List<County> Counties { get; set; }
+        public List<Staff> StaffMembers { get; set; }
     }
 }

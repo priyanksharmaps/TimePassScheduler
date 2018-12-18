@@ -153,6 +153,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\County.cs" />
+    <Compile Include="Models\ScheduleResponseViewModel.cs" />
     <Compile Include="Models\SchedulerViewModal.cs" />
     <Compile Include="Models\Staff.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -162,6 +163,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\select2.css" />
     <Content Include="Content\slick-theme.css" />
     <Content Include="Content\slick.css" />
     <Content Include="favicon.ico" />
@@ -175,6 +177,7 @@
     </Content>
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\select2.min.js" />
     <Content Include="Scripts\slick.min.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
