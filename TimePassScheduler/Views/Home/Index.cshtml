@@ -190,28 +190,18 @@
     }
 
     function submitForm() {
-        var county = [];
-        $(".countySelected").each(function () {
-            county.push($(this).attr("county-id"));
-        });
-        var selectedStaff1 = $("#selectedStaff1").val();
-        var selectedStaff2 = $("#selectedStaff2").val();
-        var selectedStaff3 = $("#selectedStaff3").val();
-        var oncallconditionsstaff = { OncallConditionId: 1, SelectedFirst: selectedStaff1, SelectedSecond: selectedStaff2, SelectedThird: selectedStaff3 };
-        var oncallconditionsstaffs = [];
-        oncallconditionsstaffs.push(oncallconditionsstaff);
-        var responsemodel = { OncallConditionalStaffs };
-        var response = { Counties: county, SelectedFirst: selectedStaff1, SelectedSecond: selectedStaff2, SelectedThird: selectedStaff3 };
+         
         $.ajax({
             type:"POST",
             url: "http://localhost:51247/api/SubmitSchedule",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            data: JSON.stringify(response),
+            data: JSON.stringify(request_oncallconditionsstaffObj),
             success: function (result) {
                 if (result) {
                     alert('data saved');
                 }
+                request_oncallconditionsstaffObj = undefined;
             },
             error: function () {
                 alert("error");
