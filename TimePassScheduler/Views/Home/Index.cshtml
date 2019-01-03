@@ -48,9 +48,64 @@
 
 <script>
     var masterData = undefined;
+    var request_oncallconditionsstaffObj = { OncallConditionalStaffs: [{ OncallConditionId: 1, SelectedFirst: [1, 2], SelectedSecond: [2, 3], SelectedThird: [3, 4] }, {}] };
+    var previous_selected_condition_id = undefined;
+    var previous_selected_condition_element = undefined;
+    function updateStaffSelection(condition_id) {
+        var oncallConditionalStaff = {};
+        var selectedStaff1 = $("#selectedStaff1").val();
+        var selectedStaff2 = $("#selectedStaff2").val();
+        var selectedStaff3 = $("#selectedStaff3").val();
+
+        if (condition_id != undefined) {
+            for (var i = 0; i < request_oncallconditionsstaffObj.OncallConditionalStaffs.length; i++) {
+                if (request_oncallconditionsstaffObj.OncallConditionalStaffs[i].OncallConditionId == condition_id) {
+                    oncallConditionalStaff = request_oncallconditionsstaffObj.OncallConditionalStaffs[i];
+                }
+            }
+            oncallConditionalStaff.OncallConditionId = condition_id;
+            oncallConditionalStaff.SelectedFirst = selectedStaff1;
+            oncallConditionalStaff.SelectedSecond = selectedStaff2;
+            oncallConditionalStaff.SelectedThird = selectedStaff3;
+            request_oncallconditionsstaffObj.OncallConditionalStaffs.push(oncallConditionalStaff);
+        }
+    }
+    function loadSelection(condition_id) {
+        //var condition_id = $(elem).attr("county-id");
+        var oncallConditionalStaff = undefined;
+
+        for (var i = 0; i < request_oncallconditionsstaffObj.OncallConditionalStaffs.length; i++) {
+            if (request_oncallconditionsstaffObj.OncallConditionalStaffs[i].OncallConditionId == condition_id) {
+                oncallConditionalStaff = request_oncallconditionsstaffObj.OncallConditionalStaffs[i];
+            }
+        }
+        if (oncallConditionalStaff != undefined) {
+            $("#selectedStaff1").val(oncallConditionalStaff.SelectedFirst);
+            $('#selectedStaff1').trigger('change');
+            $("#selectedStaff2").val(oncallConditionalStaff.SelectedSecond);
+            $('#selectedStaff2').trigger('change');
+            $("#selectedStaff3").val(oncallConditionalStaff.SelectedThird);
+            $('#selectedStaff3').trigger('change');
+
+        }
+        else {
+            $("#selectedStaff1").val(Array.empty);
+            $('#selectedStaff1').trigger('change');
+            $("#selectedStaff2").val(Array.empty);
+            $('#selectedStaff2').trigger('change');
+            $("#selectedStaff3").val(Array.empty);
+            $('#selectedStaff3').trigger('change');
+        }
+
+    }
+
     $('#btnOpenScheduler').click(function () {
+        previous_selected_condition_id = undefined;
+        previous_selected_condition_element = undefined;
         $("#schModal").modal();
         loadCounties();
+
+
     });
 
     $("#submit").click(submitForm);
@@ -62,8 +117,9 @@
                 if (result.result) {
                     masterData = result.result;
                 }
-                addCounties();
                 addStaff();
+                addCounties();
+               
             }
         });
     }
@@ -71,20 +127,53 @@
     function addCounties() {
         if (masterData !== undefined) {
             $('#counties').empty();
-            for (var i = 0; i < masterData.Counties.length; i++) {
-                $('#counties').append('<div class="col-md-2 county" county-id="' + masterData.Counties[i].ID + '" onClick="CountySelection(this)">' + masterData.Counties[i].Name + '</div>');
+            var condition_id_to_select = undefined;
+            if (request_oncallconditionsstaffObj != null && request_oncallconditionsstaffObj.OncallConditionalStaffs != null && request_oncallconditionsstaffObj.OncallConditionalStaffs.length > 0) {
+                condition_id_to_select = request_oncallconditionsstaffObj.OncallConditionalStaffs[0].OncallConditionId;
             }
+            var selectedclass = "";
+            var selectedprop = "false";
+            for (var i = 0; i < masterData.Counties.length; i++) {
+
+                if (condition_id_to_select != undefined && condition_id_to_select == masterData.Counties[i].ID) {
+                    selectedclass = "col-md-2 county countySelected";
+                    selectedprop = "true";
+                    loadSelection(condition_id_to_select);
+                    previous_selected_condition_id = condition_id_to_select;
+                }
+                else {
+                    selectedclass = "col-md-2 county";
+                }
+                $('#counties').append('<div id="conditionid-' + masterData.Counties[i].ID + '" class="' + selectedclass + '" county-id="' + masterData.Counties[i].ID + '"selected=' + selectedprop + ' onClick = "CountySelection(this)" > ' + masterData.Counties[i].Name + '</div > ');
+
+                if (condition_id_to_select != undefined && condition_id_to_select == masterData.Counties[i].ID) {
+                    previous_selected_condition_element = $('#conditionid-' + masterData.Counties[i].ID);
+                }
+
+
+            }
+
         }
     }
 
-    function CountySelection(elem) {
+        function CountySelection(elem) {
+
         var currentValue = $(elem).prop("selected");
         if (currentValue === 'true') {
             $(elem).prop("selected", 'false');
             $(elem).removeClass("countySelected").addClass("notSelected");
+           
         } else {
             $(elem).prop("selected", 'true');
             $(elem).removeClass("notSelected").addClass("countySelected");
+            if (previous_selected_condition_element != undefined) {
+                previous_selected_condition_element.prop("selected", 'false');
+                previous_selected_condition_element.removeClass("countySelected").addClass("notSelected");
+            }
+            previous_selected_condition_element = $(elem);
+            updateStaffSelection(previous_selected_condition_id);
+           loadSelection($(elem).attr("county-id"));
+            previous_selected_condition_id = $(elem).attr("county-id");
         }
     }
 
@@ -108,7 +197,10 @@
         var selectedStaff1 = $("#selectedStaff1").val();
         var selectedStaff2 = $("#selectedStaff2").val();
         var selectedStaff3 = $("#selectedStaff3").val();
-
+        var oncallconditionsstaff = { OncallConditionId: 1, SelectedFirst: selectedStaff1, SelectedSecond: selectedStaff2, SelectedThird: selectedStaff3 };
+        var oncallconditionsstaffs = [];
+        oncallconditionsstaffs.push(oncallconditionsstaff);
+        var responsemodel = { OncallConditionalStaffs };
         var response = { Counties: county, SelectedFirst: selectedStaff1, SelectedSecond: selectedStaff2, SelectedThird: selectedStaff3 };
         $.ajax({
             type:"POST",
