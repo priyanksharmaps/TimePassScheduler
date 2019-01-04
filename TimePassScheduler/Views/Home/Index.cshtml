@@ -29,15 +29,15 @@
     </div>
     <div class="row">
         <div class="col-sm-2">
-            <select id="selectedStaff1" class="multiple-select" name="states[]" multiple="multiple"></select>
+            <select id="selectedStaff1" class="multiple-select selections" name="states[]" multiple="multiple"></select>
         </div>
 
         <div class="col-sm-2">
-            <select id="selectedStaff2" class="multiple-select" name="states[]" multiple="multiple"></select>
+            <select id="selectedStaff2" class="multiple-select selections" name="states[]" multiple="multiple"></select>
         </div>
 
         <div class="col-sm-2">
-            <select id="selectedStaff3" class="multiple-select" name="states[]" multiple="multiple"></select>
+            <select id="selectedStaff3" class="multiple-select selections" name="states[]" multiple="multiple"></select>
         </div>
     </div>
     <div class="row">
@@ -48,54 +48,32 @@
 
 <script>
     var masterData = undefined;
-    var request_oncallconditionsstaffObj = { OncallConditionalStaffs: [{ OncallConditionId: 1, SelectedFirst: [1, 2], SelectedSecond: [2, 3], SelectedThird: [3, 4] }, {}] };
     var previous_selected_condition_id = undefined;
     var previous_selected_condition_element = undefined;
     function updateStaffSelection(condition_id) {
-        var oncallConditionalStaff = {};
-        var selectedStaff1 = $("#selectedStaff1").val();
-        var selectedStaff2 = $("#selectedStaff2").val();
-        var selectedStaff3 = $("#selectedStaff3").val();
+        $("[county-id=" + condition_id + "]").data({
+            OncallConditionId: condition_id,
+            SelectedFirst: $("#selectedStaff1").val(),
+            SelectedSecond: $("#selectedStaff2").val(),
+            SelectedThird: $("#selectedStaff3").val()
+        });
 
-        if (condition_id != undefined) {
-            for (var i = 0; i < request_oncallconditionsstaffObj.OncallConditionalStaffs.length; i++) {
-                if (request_oncallconditionsstaffObj.OncallConditionalStaffs[i].OncallConditionId == condition_id) {
-                    oncallConditionalStaff = request_oncallconditionsstaffObj.OncallConditionalStaffs[i];
-                }
-            }
-            oncallConditionalStaff.OncallConditionId = condition_id;
-            oncallConditionalStaff.SelectedFirst = selectedStaff1;
-            oncallConditionalStaff.SelectedSecond = selectedStaff2;
-            oncallConditionalStaff.SelectedThird = selectedStaff3;
-            request_oncallconditionsstaffObj.OncallConditionalStaffs.push(oncallConditionalStaff);
-        }
     }
     function loadSelection(condition_id) {
-        //var condition_id = $(elem).attr("county-id");
-        var oncallConditionalStaff = undefined;
-
-        for (var i = 0; i < request_oncallconditionsstaffObj.OncallConditionalStaffs.length; i++) {
-            if (request_oncallconditionsstaffObj.OncallConditionalStaffs[i].OncallConditionId == condition_id) {
-                oncallConditionalStaff = request_oncallconditionsstaffObj.OncallConditionalStaffs[i];
-            }
-        }
-        if (oncallConditionalStaff != undefined) {
-            $("#selectedStaff1").val(oncallConditionalStaff.SelectedFirst);
-            $('#selectedStaff1').trigger('change');
-            $("#selectedStaff2").val(oncallConditionalStaff.SelectedSecond);
-            $('#selectedStaff2').trigger('change');
-            $("#selectedStaff3").val(oncallConditionalStaff.SelectedThird);
-            $('#selectedStaff3').trigger('change');
+        var data = $("[county-id=" + condition_id + "]").data()
+        if (data !== undefined && data !== null) {
+            $("#selectedStaff1").val(data.SelectedFirst);
+            $("#selectedStaff2").val(data.SelectedSecond);
+            $("#selectedStaff3").val(data.SelectedThird);
 
         }
         else {
-            $("#selectedStaff1").val(Array.empty);
-            $('#selectedStaff1').trigger('change');
-            $("#selectedStaff2").val(Array.empty);
-            $('#selectedStaff2').trigger('change');
-            $("#selectedStaff3").val(Array.empty);
-            $('#selectedStaff3').trigger('change');
+            $('.selections').each(function (i, elem) {
+                $(elem).val(Array.empty);
+            });
         }
+
+        $('.selections').trigger('change');
 
     }
 
@@ -119,18 +97,16 @@
                 }
                 addStaff();
                 addCounties();
-               
+
             }
         });
     }
 
     function addCounties() {
+        debugger;
         if (masterData !== undefined) {
             $('#counties').empty();
             var condition_id_to_select = undefined;
-            if (request_oncallconditionsstaffObj != null && request_oncallconditionsstaffObj.OncallConditionalStaffs != null && request_oncallconditionsstaffObj.OncallConditionalStaffs.length > 0) {
-                condition_id_to_select = request_oncallconditionsstaffObj.OncallConditionalStaffs[0].OncallConditionId;
-            }
             var selectedclass = "";
             var selectedprop = "false";
             for (var i = 0; i < masterData.Counties.length; i++) {
@@ -156,13 +132,12 @@
         }
     }
 
-        function CountySelection(elem) {
-
+    function CountySelection(elem) {
         var currentValue = $(elem).prop("selected");
         if (currentValue === 'true') {
             $(elem).prop("selected", 'false');
             $(elem).removeClass("countySelected").addClass("notSelected");
-           
+
         } else {
             $(elem).prop("selected", 'true');
             $(elem).removeClass("notSelected").addClass("countySelected");
@@ -172,7 +147,7 @@
             }
             previous_selected_condition_element = $(elem);
             updateStaffSelection(previous_selected_condition_id);
-           loadSelection($(elem).attr("county-id"));
+            loadSelection($(elem).attr("county-id"));
             previous_selected_condition_id = $(elem).attr("county-id");
         }
     }
@@ -190,18 +165,27 @@
     }
 
     function submitForm() {
-         
+        var lastCounty = $('.countySelected').attr("county-id");
+        updateStaffSelection(lastCounty);
+        var submitData = { OncallConditionalStaffs: [] };
+        $('.county').each(function (i, elem){
+            var data = $(elem).data();
+            if (data !== null && data !== undefined) {
+                if (data.OncallConditionId !== undefined) {
+                    submitData.OncallConditionalStaffs.push(data);
+                }
+            }
+        });
         $.ajax({
-            type:"POST",
+            type: "POST",
             url: "http://localhost:51247/api/SubmitSchedule",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            data: JSON.stringify(request_oncallconditionsstaffObj),
+            data: JSON.stringify(submitData),
             success: function (result) {
                 if (result) {
                     alert('data saved');
                 }
-                request_oncallconditionsstaffObj = undefined;
             },
             error: function () {
                 alert("error");
